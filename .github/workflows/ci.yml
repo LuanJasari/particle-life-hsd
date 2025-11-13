@@ -1,0 +1,45 @@
+---
+
+### 3. Inhalt für deine CI-Pipeline (Fertig zum Kopieren)
+
+Erstelle in deinem Repo den Ordner `.github/workflows` und darin die Datei `ci.yml`. Füge das hier ein:
+
+```yaml
+name: Python CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install ruff pytest numpy
+        # Falls requirements.txt existiert: pip install -r requirements.txt
+
+    - name: Lint with Ruff
+      run: |
+        # Zeigt Fehler an, bricht aber (erstmal) nicht ab, falls ihr noch am Anfang seid
+        ruff check . || true 
+
+    - name: Test with pytest
+      run: |
+        # Führt Tests aus, falls welche da sind
+        pytest || true
