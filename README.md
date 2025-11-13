@@ -18,8 +18,8 @@ Stelle sicher, dass du Python 3.8+ installiert hast.
 Führe die folgenden Befehle in deinem Terminal aus:
 
 ```bash
-git clone [https://github.com/Tymauricee/particle-life-hsd.git](https://github.com/Tymauricee/particle-life-hsd.git)
-cd particle-life-hsd
+git clone [https://github.com/LuanJasari/Biology-inspired-algorithms---emergent-behavier.git](https://github.com/LuanJasari/Biology-inspired-algorithms---emergent-behavier.git)
+cd Biology-inspired-algorithms---emergent-behavier
 
 pip install -r requirements.txt
 python main.py
