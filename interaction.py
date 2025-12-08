@@ -7,18 +7,16 @@ class Interaction:
     Optimiert für NumPy: Statt einzelne Werte abzufragen, berechnet diese Klasse
     Matrizen für das gesamte System (Vektorisierung).
     """
-    def __init__(self, num_types: int, friction: float = 0.1, max_distance: float = 50.0):
+    def __init__(self, num_types: int):
         """
         Initialisiert die Interaktions-Logik.
 
         Args:
             num_types (int): Anzahl der Partikel-Typen (Farben).
-            friction (float): Globaler Reibungskoeffizient (0.0 bis 1.0).
-            max_distance (float): Radius, ab dem keine Kraft mehr wirkt (rMax).
+
         """
         self.num_types = num_types
-        self.friction = friction
-        self.max_distance = max_distance
+
 
         # Die Interaktions-Matrix (N_types x N_types)
         # Wertebereich: -1.0 (Abstoßung) bis +1.0 (Anziehung)
@@ -27,7 +25,7 @@ class Interaction:
         # Initialisiert die Standard-Regeln
         self._make_default_matrix()
 
-        print(f"--> [Interaction] Initialisiert: {num_types} Typen, rMax={max_distance}")
+        print(f"--> [Interaction] Initialisiert: {num_types} Typen")
 
     def set_rule(self, type_a: int, type_b: int, force: float):
         """Setzt eine spezifische Regel manuell."""
@@ -46,6 +44,7 @@ class Interaction:
 
         # Optional: Zufällige kleine Variationen für interessanteres Verhalten
         # self.matrix += np.random.uniform(-0.1, 0.1, size=self.matrix.shape)
+        return self.matrix
 
     def get_rule_grid(self, types_array: np.ndarray) -> np.ndarray:
         """
