@@ -59,7 +59,7 @@ class Simulation:
 
     #Berechnung neuer Beschleunigungen. Annahme: Jedes Partikel wiegt 1 kg, deswegen F=a
     def update_accelerations(self):
-        self.particles.accelerations += self.compute_total_forces()
+        self.particles.accelerations = self.compute_total_forces()
 
     #Berechnung neuer Geschwindigkeiten und Positionen: Aus den Formeln: dv/dt = a und ds/dt = v
     def update_velocities(self):

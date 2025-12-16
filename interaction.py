@@ -1,12 +1,14 @@
 import numpy as np
 
+
 class Interaction:
     """
     Verwaltet die physikalischen Regeln der Simulation (Das 'Gesetzbuch').
-    
+
     Optimiert für NumPy: Statt einzelne Werte abzufragen, berechnet diese Klasse
     Matrizen für das gesamte System (Vektorisierung).
     """
+
     def __init__(self, num_types: int):
         """
         Initialisiert die Interaktions-Logik.
@@ -17,11 +19,10 @@ class Interaction:
         """
         self.num_types = num_types
 
-
         # Die Interaktions-Matrix (N_types x N_types)
         # Wertebereich: -1.0 (Abstoßung) bis +1.0 (Anziehung)
         self.matrix = np.zeros((num_types, num_types))
-        
+
         # Initialisiert die Standard-Regeln
         self._make_default_matrix()
 
@@ -38,7 +39,7 @@ class Interaction:
         """
         # Setze erst mal alles auf Abstoßung (-1.0)
         self.matrix.fill(-1.0)
-        
+
         # Setze die Diagonale (Gleiche Farben) auf Anziehung (+1.0)
         np.fill_diagonal(self.matrix, 1.0)
 
@@ -49,8 +50,8 @@ class Interaction:
     def get_rule_grid(self, types_array: np.ndarray) -> np.ndarray:
         """
         DER PERFORMANCE-BOOSTER (Advanced Indexing).
-        
-        Erstellt basierend auf dem Typen-Array aller Partikel sofort 
+
+        Erstellt basierend auf dem Typen-Array aller Partikel sofort
         die korrekte (N, N) Kraft-Matrix für jeden gegen jeden.
 
         Args:

@@ -1,27 +1,40 @@
 from particles import ParticleSystem
+from interaction import Interaction
+from simulation import Simulation
+from visualisation import Visualizer
 
 
 def main():
-    """
-    Haupt-Einstiegspunkt.
-    Aktuell: Testet die Initialisierung der Datenstrukturen für Milestone 2.
-    """
-    print("=== Particle Life Simulator ===")
+    print("=== Particle Life Simulator (Milestone 3 Build) ===")
 
-    # Konfiguration
-    NUMBER_OF_PARTICLES = 2000
+    # 1. Konfiguration
+    NUMBER_OF_PARTICLES = 1500  # Startwert für flüssige 60 FPS
     NUMBER_OF_TYPES = 4
 
-    # Initialisierung des Systems (Deine Aufgabe aus Issue #1)
-    system = ParticleSystem(NUMBER_OF_PARTICLES, NUMBER_OF_TYPES)
+    # Physik-Parameter (Experimentiere hiermit für cooles Verhalten!)
+    DT = 0.02  # Zeitschritt
+    MAX_R = 0.15  # Radius der Wahrnehmung
+    FRICTION = 0.1  # Reibung (0.0 = keine, 1.0 = Klebstoff)
 
-    # Kurzer Check der Daten (Proof of Concept)
-    print("\nDaten-Check (Erste 3 Partikel):")
-    print(f"Pos 1: {system.positions[0]}")
-    print(f"Pos 2: {system.positions[1]}")
-    print(f"Typ 1: {system.types[0]}")
+    # 2. Initialisierung Backend
+    print("-> Initialisiere Partikel...")
+    particles = ParticleSystem(NUMBER_OF_PARTICLES, NUMBER_OF_TYPES)
 
-    print("\nSystem läuft. Bereit für Physik-Implementierung.")
+    print("-> Initialisiere Regeln...")
+    interactions = Interaction(NUMBER_OF_TYPES)
+
+    # Kleiner Hack: Setze eine zufällige Matrix für spannenderes Start-Verhalten
+    # (Sonst stoßen sich standardmäßig alle ab, siehe interaction.py)
+    import numpy as np
+    interactions.matrix = np.random.uniform(-0.5, 1.0, size=(NUMBER_OF_TYPES, NUMBER_OF_TYPES))
+
+    print("-> Starte Physik-Engine...")
+    sim = Simulation(DT, MAX_R, FRICTION, particles, interactions)
+
+    # 3. Start Frontend
+    print("-> Öffne Fenster (Vispy)...")
+    viz = Visualizer(sim)
+    viz.run()
 
 
 if __name__ == "__main__":
