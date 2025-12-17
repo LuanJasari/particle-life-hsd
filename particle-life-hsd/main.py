@@ -8,7 +8,7 @@ def main():
     print("=== Particle Life Simulator (Milestone 3 Build) ===")
 
     # 1. Konfiguration
-    NUMBER_OF_PARTICLES = 150  # Startwert für flüssige 60 FPS
+    NUMBER_OF_PARTICLES = 200  # Startwert für flüssige 60 FPS
     NUMBER_OF_TYPES = 4
 
     # Physik-Parameter (Experimentiere hiermit für cooles Verhalten!)

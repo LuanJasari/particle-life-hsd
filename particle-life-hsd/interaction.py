@@ -13,10 +13,6 @@ class Interaction:
     def __init__(self, num_types: int):
         """
         Initialisiert die Interaktions-Logik.
-
-        Args:
-            num_types (int): Anzahl der Partikel-Typen (Farben).
-
         """
         self.num_types = num_types
 
@@ -32,16 +28,26 @@ class Interaction:
 
     def _make_default_matrix(self):
         """
-        Eine Interaktionsmatrix mit selbst definierten Regeln
+        Interaktionsmatrix für echtes 'Particle Life' (Asymmetrisch).
         """
-        # Setze erst mal alles auf Abstoßung (-1.0)
-        matrix= np.array([
-            [1.0, -0.9,  0.5, -0.8],
-            [-0.9,  1.0, -0.1,  0.6],
-            [0.5, -0.1,  1.0, -0.8],
-            [-0.8,  0.6, -0.8,  1.0]
-        ], dtype=float
-        )
+        # Wir definieren 4 Typen: 0=Rot, 1=Grün, 2=Blau, 3=Weiß
+        # Zeile i = Wie reagiert Typ i auf andere?
+        # Spalte j = Auf wen wird reagiert?
+
+        matrix = np.array([
+            #           Rot   Grün  Blau  Weiß  (Gegenüber)
+            # Typ 0 (Rot)
+            [1.0, 0.8, -0.5, -0.5],  # Rot mag sich und Grün, hasst Blau
+
+            # Typ 1 (Grün)
+            [-0.8, 1.0, 0.5, 0.0],  # Grün flieht vor Rot (!), mag sich
+
+            # Typ 2 (Blau)
+            [0.5, -0.5, 1.0, 0.5],  # Blau jagt Rot (!), hasst Grün
+
+            # Typ 3 (Weiß)
+            [0.0, 0.5, -0.2, 1.0]  # Weiß mag Grün, ignoriert Rest
+        ], dtype=float)
 
         return matrix
 
