@@ -1,5 +1,4 @@
 import numpy as np
-from astropy.utils.metadata.utils import dtype
 
 
 class Interaction:
