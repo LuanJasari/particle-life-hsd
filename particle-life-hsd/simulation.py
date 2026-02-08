@@ -1,21 +1,13 @@
 import numpy as np
-import sys
+from numba import jit
 
-#from particles import ParticleSystem
-#from interaction import Interaction
 
 class Simulation:
     """
-    Implementierung der Physik: Berechnung von Distanzen, Kräfte und Aktualisierung der Geschwindigkeiten sowie Positionen der Partikeln.
-    Das Ganze mithilfe von Numpy Broadcasting. Vorteil: alle Berechnungen auf alle Partikeln auf einmal durchgeführt (für Aufwandsoptimierung).
-
-    Attributes:
-        dt (int) : stellt die Zeitänderung dar.
-        friction (int) : repräsentiert die aus Reibung resultierende Verzögerung (Deceleration due to kinetic friction)
-        max_r (int) : der maximale Abstand für Interaktion
-        particles : ein Instanz von ParticleSystem
-        interaction : ein Instanz von Interaction
+    High-Performance Implementierung der Physik mit Numba JIT.
+    Statt speicherintensiver Matrizen nutzen wir kompilierte Schleifen.
     """
+
     def __init__(self, dt, max_r, friction, particles, interactions):
         self.dt = dt
         self.max_r = max_r
@@ -23,57 +15,104 @@ class Simulation:
         self.particles = particles
         self.interaction = interactions
 
-    #Aufstellung einer Matrix, deren Einträge die Richtungsvektoren zwischen allen Partikelpaaren enthalten. Shape (N,N,2)
-    def compute_distance_vector_matrix(self):
-        distance_vector_matrix = self.particles.positions[:, np.newaxis, :] - self.particles.positions[np.newaxis, :, :]
-        return distance_vector_matrix
+    def step(self):
+        """Führt einen kompletten Simulationsschritt durch (Kräfte + Bewegung)."""
 
-    #Aufstellung einer Matrix, deren Einträge die Länge der Richtungsvektoren (Distanzen zwischen allen Partikelpaaren) enthalten. Shape (N,N)
-    def compute_distances(self):
-        distance_scalar_matrix= np.linalg.norm(self.compute_distance_vector_matrix(),axis=2)
-        return distance_scalar_matrix
+        # 1. Daten für Numba vorbereiten (NumPy Arrays extrahieren)
+        positions = self.particles.positions
+        velocities = self.particles.velocities
+        types = self.particles.types
+        rules = self.interaction.matrix
 
-    #Aufstellung einer Matrix, deren Einträge die Einheitsvektoren der Richtungsvektoren enthalten. Shape (N,N,2)
-    def compute_unit_vectors(self):
-        #division durch null vermeiden
-        distances= np.where(self.compute_distances()==0,sys.float_info.min,self.compute_distances()) #sys.float_info.min: der kleinste Wert in Python
-        drx_vector_matrix= self.compute_distance_vector_matrix()/distances[:,:,np.newaxis]
-        return drx_vector_matrix
+        # 2. Die schwere Arbeit an Numba delegieren
+        # Wir übergeben Arrays und erhalten neue Geschwindigkeiten/Positionen zurück
+        update_physics_numba(
+            positions,
+            velocities,
+            types,
+            rules,
+            self.max_r,
+            self.dt,
+            self.friction
+        )
 
-    #Aufstellung einer Matrix, deren Einträge die Kräfte (als Scalar) zwischen allen Partikelpaaren enthalten. Shape (N,N)
-    def compute_forces(self):
-        force_variable_matrix=  1 - (self.compute_distances()/self.max_r)
-        # if distance > max_r --> force_variable=0
-        force_variable_matrix= np.clip(force_variable_matrix, 0.0, None)
-        force_scalar_matrix= self.interaction.get_rule_grid(self.particles.types) * force_variable_matrix
-        return force_scalar_matrix
+        # 3. Wrapping (Randbedingung: Partikel bleiben im Bereich 0.0-1.0)
+        # Das geht in NumPy sehr schnell
+        self.particles.positions %= 1.0
 
-    #Aufstellung einer Matrix, deren Einträge die Kräfte (als Vektor) zwischen jeden Partikelpaaren enthalten. Shape: (N,N,2)
-    def compute_force_vector(self):
-        force_vektor_matrix= self.compute_forces()[:,:,np.newaxis] * self.compute_unit_vectors()
-        return force_vektor_matrix
+    # Wrapper-Methoden für Kompatibilität mit Visualizer/Tests
+    def update_accelerations(self): pass  # In Numba integriert
 
-    #Berechnung des endgültigen Numpy-Arrays, nachdem alle Kräfte, die auf jedes Partikel agieren, summiert werden. Shape: (N,2)
-    def compute_total_forces(self):
-        return np.sum(self.compute_force_vector(), axis=1)
+    def update_velocities(self): pass  # In Numba integriert
 
-    #Berechnung neuer Beschleunigungen. Annahme: Jedes Partikel wiegt 1 kg, deswegen F=a
-    def update_accelerations(self):
-        self.particles.accelerations = self.compute_total_forces()
+    def update_positions(self):  # In Numba integriert
+        self.step()
 
-    #Berechnung neuer Geschwindigkeiten und Positionen: Aus den Formeln: dv/dt = a und ds/dt = v
-    def update_velocities(self):
-        self.particles.velocities += self.particles.accelerations * self.dt
-        self.particles.velocities *= (1 - (self.friction * self.dt))
-
-    def update_positions(self):
-        self.particles.positions += self.particles.velocities * self.dt
+    # --- Der Numba JIT Kernel (Das Herzstück) ---
 
 
+# @jit(nopython=True) kompiliert diesen Python-Code in extrem schnellen Maschinencode.
+# parallel=True könnte man noch nutzen, aber für den Anfang reicht nopython.
 
-#simulation= Simulation(0.1,0.1,0.1, ParticleSystem(16,4), Interaction(4))
-#for i in range(100):
-    #simulation.update_accelerations()
-    #simulation.update_velocities()
-    #simulation.update_positions()
-    #print(simulation.particles.positions[:5])
+@jit(nopython=True, fastmath=True)
+def update_physics_numba(positions, velocities, types, rules, max_r, dt, friction):
+    n_particles = len(positions)
+
+    # Nested Loop: Jeder gegen Jeden (O(N^2))
+    # Aber: Da es kompiliert ist, läuft es 100x schneller als Python.
+    for i in range(n_particles):
+        total_force_x = 0.0
+        total_force_y = 0.0
+
+        pos_x_i = positions[i, 0]
+        pos_y_i = positions[i, 1]
+        type_i = types[i]
+
+        for j in range(n_particles):
+            if i == j:
+                continue
+
+            # 1. Vektor berechnen
+            dx = positions[j, 0] - pos_x_i
+            dy = positions[j, 1] - pos_y_i
+
+            # 2. Wrap-Around (Torus-Welt) berücksichtigen
+            # Wenn dx > 0.5 ist, ist der Weg über den Rand kürzer -> dx -= 1.0
+            if dx > 0.5:
+                dx -= 1.0
+            elif dx < -0.5:
+                dx += 1.0
+            if dy > 0.5:
+                dy -= 1.0
+            elif dy < -0.5:
+                dy += 1.0
+
+            # 3. Distanz
+            dist_sq = dx * dx + dy * dy
+
+            # Performance: Wurzelziehen ist teuer, daher erst prüfen ob wir im Radius sind
+            if dist_sq > 0 and dist_sq < (max_r * max_r):
+                dist = np.sqrt(dist_sq)
+
+                # 4. Kraft berechnen (Normale Physik)
+                # F = rule * (1 - dist/max_r)
+                # rule holen wir direkt aus der Matrix: rules[type_i, type_j]
+                force_val = rules[type_i, types[j]] * (1.0 - (dist / max_r))
+
+                # Vektor normalisieren und Kraft anwenden
+                total_force_x += (dx / dist) * force_val
+                total_force_y += (dy / dist) * force_val
+
+        # 5. Integration (Euler) direkt hier anwenden
+        # Reibung
+        velocities[i, 0] *= (1.0 - friction * dt)
+        velocities[i, 1] *= (1.0 - friction * dt)
+
+        # Beschleunigung -> Geschwindigkeit
+        velocities[i, 0] += total_force_x * dt
+        velocities[i, 1] += total_force_y * dt
+
+    # 6. Geschwindigkeit -> Position (außerhalb der i-Schleife anwenden)
+    for i in range(n_particles):
+        positions[i, 0] += velocities[i, 0] * dt
+        positions[i, 1] += velocities[i, 1] * dt
