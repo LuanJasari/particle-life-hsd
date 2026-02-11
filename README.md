@@ -20,10 +20,26 @@ Die Software wurde mit Fokus auf **Performance (Numba JIT)**, **Clean Code** und
 
 ---
 
+## 📊 Performance Benchmarks
+
+Um die Effizienz der Optimierung zu beweisen, wurde ein standardisiertes Profiling durchgeführt (Script: `profiling.py`). Die Ergebnisse belegen, dass der Python-Interpreter-Overhead durch `numba` eliminiert wurde.
+
+**Test-Szenario:**
+* **Anzahl Partikel:** 1.500
+* **Zeitschritte:** 200 (Headless Mode)
+* **Komplexität:** $O(N^2)$ Interaktionen pro Frame
+
+**Ergebnisse:**
+* **Durchschnittliche Framerate:** **80.40 FPS**
+* **Berechnungszeit pro Frame:** ~12 ms
+* **Bottleneck-Analyse:** >99% der Rechenzeit finden innerhalb der kompilierten `step()`-Funktion statt (No Python Overhead).
+
+---
+
 ## 🛠 Installation & Setup
 
 ### Voraussetzungen
-* Python 3.9 oder neuer
+* Python 3.10 oder neuer
 * Empfohlen: Virtuelle Umgebung (venv oder conda)
 
 ### Installation
@@ -71,8 +87,8 @@ Die Simulation kann während der Laufzeit über die Tastatur gesteuert werden, u
 Das Projekt folgt dem **Model-View-Pattern**, um Logik und Darstellung strikt zu trennen:
 
 * **`main.py`**: Einstiegspunkt. Initialisiert System und Visualizer.
-* **`particles.py`**: Datencontainer. Verwaltet die Zustands-Arrays (Positionen, Geschwindigkeiten) mittels `numpy`. Es gibt keine Python-Objekte pro Partikel (Performance!).
-* **`simulation.py` (Model)**: Die Physik-Engine. Enthält den `step()`-Algorithmus.
+* **`particles.py`**: Datencontainer. Verwaltet die Zustands-Arrays (Positionen, Geschwindigkeiten) mittels `numpy`. Es gibt keine Python-Objekte pro Partikel (Memory Optimization).
+* **`simulation.py` (Model)**: Die Physik-Engine. Enthält den `@jit`-optimierten Algorithmus.
 * **`interaction.py`**: Verwaltet die Regel-Matrix (wer zieht wen an?).
 * **`visualisation.py` (View)**: Handhabt das OpenGL-Fenster und Inputs via `vispy`.
 
@@ -82,13 +98,11 @@ Die größte Herausforderung ist die Berechnung der Kräfte zwischen allen Parti
 
 * **Problem:** Reines Python ist für verschachtelte Schleifen zu langsam.
 * **Lösung:** Wir nutzen den `@jit(nopython=True)` Dekorator von **Numba**.
-* **Effekt:** Der Python-Bytecode wird zur Laufzeit in optimierten Maschinencode kompiliert. Dies erlaubt Berechnungen im Millisekunden-Bereich für tausende Partikel.
-
-Siehe `simulation.py` -> `update_physics_numba`.
+* **Effekt:** Der Python-Bytecode wird zur Laufzeit in optimierten Maschinencode kompiliert.
 
 ### 3. Die Interaktions-Matrix
 
-Die Regeln werden in einer asymmetrischen Matrix  gespeichert.
+Die Regeln werden in einer asymmetrischen Matrix gespeichert.
 
 * Ein Wert von `1.0` bedeutet maximale Anziehung.
 * Ein Wert von `-1.0` bedeutet maximale Abstoßung.
@@ -98,7 +112,7 @@ Die Regeln werden in einer asymmetrischen Matrix  gespeichert.
 
 ## 🧪 Testing & Qualitätssicherung
 
-Das Projekt nutzt `pytest` für Unit-Tests und `ruff` für das Linting.
+Das Projekt nutzt `pytest` für Unit-Tests und `ruff` für das Linting. Die Tests decken die physikalische Korrektheit und die Datenstrukturen ab.
 
 **Tests ausführen:**
 
