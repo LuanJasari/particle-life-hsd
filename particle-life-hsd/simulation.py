@@ -1,8 +1,18 @@
 import numpy as np
 from numba import jit
 
+
 class Simulation:
+    """
+    High-Performance Implementierung der Physik mit Numba JIT.
+    Statt speicherintensiver Matrizen nutzen wir kompilierte Schleifen.
+    Die Formatierung folgt den Clean-Code-Vorgaben des Moduls[cite: 4, 47].
+    """
+
     def __init__(self, dt, max_r, friction, noise, particles, interactions):
+        """
+        Initialisiert die Simulation mit physikalischen Parametern.
+        """
         self.dt = dt
         self.max_r = max_r
         self.friction = friction
@@ -11,63 +21,108 @@ class Simulation:
         self.interaction = interactions
 
     def step(self):
-        # Vorbereitung der Daten für den Numba-Kernel
+        """Führt einen kompletten Simulationsschritt durch."""
+
+        # 1. Daten für Numba vorbereiten (NumPy Arrays extrahieren)
         positions = self.particles.positions
         velocities = self.particles.velocities
         types = self.particles.types
         rules = self.interaction.matrix
 
+        # 2. Die physikalischen Berechnungen an Numba delegieren
         update_physics_numba(
-            positions, velocities, types, rules,
-            self.max_r, self.dt, self.friction, self.noise
+            positions,
+            velocities,
+            types,
+            rules,
+            self.max_r,
+            self.dt,
+            self.friction,
+            self.noise
         )
 
-        # Torus-Welt: Partikel bleiben im Bereich 0.0-1.0
+        # 3. Wrapping (Randbedingung: Partikel bleiben im Bereich 0.0-1.0)
+        # Dies wird effizient über NumPy gelöst.
         self.particles.positions %= 1.0
 
-    def update_accelerations(self): pass
-    def update_velocities(self): pass
+    # Wrapper-Methoden für Kompatibilität mit dem Visualizer
+    def update_accelerations(self):
+        """Platzhalter, da die Beschleunigung im Numba-Kernel integriert ist."""
+        pass
+
+    def update_velocities(self):
+        """Platzhalter, da die Geschwindigkeiten im Numba-Kernel aktualisiert werden."""
+        pass
+
     def update_positions(self):
+        """Führt den gesamten Simulationsschritt aus."""
         self.step()
+
 
 @jit(nopython=True, fastmath=True)
 def update_physics_numba(positions, velocities, types, rules, max_r, dt, friction, noise):
+    """
+    Numba JIT Kernel zur Berechnung der Interaktionen.
+    Die Struktur wurde angepasst, um E701-Linter-Fehler zu vermeiden.
+    """
     n_particles = len(positions)
 
+    # Nested Loop: Jeder gegen Jeden (O(N^2))
     for i in range(n_particles):
         total_force_x = 0.0
         total_force_y = 0.0
+
         pos_x_i = positions[i, 0]
         pos_y_i = positions[i, 1]
         type_i = types[i]
 
         for j in range(n_particles):
-            if i == j: continue
+            if i == j:
+                continue
 
+            # 1. Vektor berechnen
             dx = positions[j, 0] - pos_x_i
             dy = positions[j, 1] - pos_y_i
 
-            # Wrap-Around (Torus)
-            if dx > 0.5: dx -= 1.0
-            elif dx < -0.5: dx += 1.0
-            if dy > 0.5: dy -= 1.0
-            elif dy < -0.5: dy += 1.0
+            # 2. Wrap-Around (Torus-Welt) berücksichtigen
+            if dx > 0.5:
+                dx -= 1.0
+            elif dx < -0.5:
+                dx += 1.0
 
+            if dy > 0.5:
+                dy -= 1.0
+            elif dy < -0.5:
+                dy += 1.0
+
+            # 3. Distanzberechnung
             dist_sq = dx * dx + dy * dy
 
             if dist_sq > 0 and dist_sq < (max_r * max_r):
                 dist = np.sqrt(dist_sq)
-                # Kraftberechnung [cite: 31, 33]
+
+                # 4. Kraft berechnen (F = rule * (1 - dist/max_r))
+                # Die Regel wird aus der Interaktionsmatrix bezogen[cite: 34, 184].
                 force_val = rules[type_i, types[j]] * (1.0 - (dist / max_r))
+
+                # Vektor normalisieren und Kraft anwenden
                 total_force_x += (dx / dist) * force_val
                 total_force_y += (dy / dist) * force_val
 
-        # Euler-Integration inkl. Reibung und Noise [cite: 125, 39]
+        # 5. Integration (Euler) inkl. Reibung und Zufallsbewegung
+        # Reibung anwenden
         velocities[i, 0] *= (1.0 - friction * dt)
         velocities[i, 1] *= (1.0 - friction * dt)
-        velocities[i, 0] += (total_force_x + (np.random.random() * 2 - 1) * noise) * dt
-        velocities[i, 1] += (total_force_y + (np.random.random() * 2 - 1) * noise) * dt
 
+        # Kräfte und Noise auf Geschwindigkeit anwenden
+        # Noise sorgt für die geforderte zusätzliche Zufallsbewegung[cite: 39].
+        v_noise_x = (np.random.random() * 2.0 - 1.0) * noise
+        v_noise_y = (np.random.random() * 2.0 - 1.0) * noise
+
+        velocities[i, 0] += (total_force_x + v_noise_x) * dt
+        velocities[i, 1] += (total_force_y + v_noise_y) * dt
+
+    # 6. Geschwindigkeit auf Position anwenden
     for i in range(n_particles):
         positions[i, 0] += velocities[i, 0] * dt
         positions[i, 1] += velocities[i, 1] * dt
