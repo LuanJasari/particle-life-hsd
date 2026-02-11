@@ -140,39 +140,3 @@ ruff check .
 * Tymauricee
 
 ```
-
----
-
-### Was jetzt noch fehlt (Der Endspurt)
-
-Du hast jetzt Code und Doku. Hier sind die letzten 3 Schritte, um die "Abgabe" wasserdicht zu machen:
-
-#### 1. Der Beweis der Optimierung (Pflicht für Milestone 4)
-Du hast eine `profiling.py`, aber du musst beweisen, dass du sie genutzt hast.
-* **Action:** Führe `python profiling.py` aus.
-* **Action:** Kopiere den Output (Text in der Konsole) in eine neue Datei namens `profiling_report.txt` und lade sie ins Repo hoch.
-* **Warum?** Damit der Prof sieht: "Aha, sie haben gemessen, Numba ist schnell." [cite_start]Das sichert die 15% für "Performance Profiling"[cite: 54].
-
-#### 2. Das "Architektur Diagramm"
-Du hast ein `Architektur diagram.pdf` im Repo.
-* **Problem:** PDFs in Git sind "tot". Niemand klickt die an.
-* **Action:** Wandle das PDF in ein Bild (PNG) um, nenne es `architecture.png` und binde es in die README ein (ich habe den Platzhalter im Text oben weggelassen, weil ich das Bild nicht habe, aber du solltest es unter "Architektur-Übersicht" einfügen: `![Architektur](./architecture.png)`).
-
-#### 3. Config (Optionaler Clean Code Bonus)
-In deiner `main.py` sind Werte wie `NUMBER_OF_PARTICLES = 2000` hardcodiert.
-* **Clean Code:** Erstelle eine `config.py`:
-    ```python
-    # config.py
-    NUMBER_OF_PARTICLES = 2000
-    NUMBER_OF_TYPES = 4
-    DT = 0.001
-    MAX_R = 0.15
-    FRICTION = 0.1
-    NOISE = 0.02
-    ```
-* Importiere das in `main.py`: `import config as cfg` und nutze `cfg.NUMBER_OF_PARTICLES`.
-* Das ist schnell gemacht und sieht sehr sauber aus.
-
-Soll ich dir die `config.py` und die angepasste `main.py` auch noch generieren?
-
-```
