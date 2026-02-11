@@ -5,32 +5,29 @@ from visualisation import Visualizer
 
 
 def main():
-    print("=== Particle Life Simulator (Milestone 3+ Feature Complete) ===")
+    print("=== Particle Life Simulator (Milestone 3 Build) ===")
 
     # 1. Konfiguration
-    # Tipp: Reduziere die Partikelzahl für Tests, erhöhe sie für das finale Video
-    NUMBER_OF_PARTICLES = 1500
+    NUMBER_OF_PARTICLES = 2000  # Startwert für flüssige 60 FPS
     NUMBER_OF_TYPES = 4
 
-    # Physik-Parameter
-    # Gute Werte für "Zellen": dt=0.02, max_r=0.1, friction=0.1, noise=0.05
-    DT = 0.02  # Zeitschritt (kleiner = genauer, aber langsamer)
-    MAX_R = 0.1  # Radius der Wahrnehmung
-    FRICTION = 0.1  # Reibung (Verhindert Explosion der Geschwindigkeiten)
-    NOISE = 0.05  # NEU: Zufallsbewegung (Macht das System "organischer")
+    # Physik-Parameter (Experimentiere hiermit für cooles Verhalten!)
+    DT = 0.001  # Zeitschritt
+    MAX_R = 0.15  # Radius der Wahrnehmung
+    FRICTION = 0.1  # Reibung (0.0 = keine, 1.0 = Klebstoff)
 
     # 2. Initialisierung Backend
-    print(f"-> Setup: {NUMBER_OF_PARTICLES} Partikel, 4 Typen")
+    print("-> Initialisiere Partikel...")
     particles = ParticleSystem(NUMBER_OF_PARTICLES, NUMBER_OF_TYPES)
 
-    # Interaktions-Regeln (Zufällig für spannende Ergebnisse)
+    print("-> Initialisiere Regeln...")
     interactions = Interaction(NUMBER_OF_TYPES)
-    # Optional: Setze eine feste Matrix für reproduzierbare Ergebnisse
-    # interactions.set_rule(0, 0, 1.0) ...
 
-    print("-> Starte Physik-Engine (Numba JIT)...")
-    # Hier übergeben wir den neuen NOISE Parameter
-    sim = Simulation(DT, MAX_R, FRICTION, NOISE, particles, interactions)
+
+    #interactions.matrix = np.random.uniform(-0.5, 1.0, size=(NUMBER_OF_TYPES, NUMBER_OF_TYPES))
+
+    print("-> Starte Physik-Engine...")
+    sim = Simulation(DT, MAX_R, FRICTION, particles, interactions)
 
     # 3. Start Frontend
     print("-> Öffne Fenster (Vispy)...")

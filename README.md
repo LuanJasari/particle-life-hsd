@@ -10,19 +10,6 @@ Dieses Projekt implementiert eine **Particle-Life-Simulation** in Python. Ziel i
 - **Performance:** Optimiert mit **NumPy**, optional **Numba** (JIT)  
 - **Visualisierung:** Echtzeit-Rendering über **Vispy** (GPU) oder **Pygame**
 
-
-## Software Architektur
-
-Das Projekt folgt einem datenorientierten Design (Data-Oriented Design), um Python-Performance-Limits zu umgehen:
-
-* **ParticleSystem:** Verwaltet die Zustandsdaten (Positionen, Geschwindigkeiten, Typen) in flachen, zusammenhängenden NumPy-Arrays (SoA - Structure of Arrays). Dies maximiert Cache-Lokalität.
-* **Interaction:** Berechnet eine vorberechnete Lookup-Matrix für Interaktionsregeln, um zur Laufzeit O(1) Zugriffe auf Kraft-Koeffizienten zu ermöglichen.
-* **Simulation (Physics Engine):**
-    * Die kritische Pfadberechnung (O(N^2) Interaktionen) wurde mittels **Numba JIT (Just-In-Time Compiler)** optimiert.
-    * Der Python-Bytecode wird zur Laufzeit in optimierten Maschinen-Code kompiliert.
-    * Dadurch erreichen wir C++ ähnliche Performance und können >1500 Partikel bei 60 FPS simulieren.
-* **Visualizer:** Entkoppeltes Frontend basierend auf `vispy` (OpenGL), das die NumPy-Arrays direkt auf die GPU mapped, ohne teures Kopieren von Objekten.
-
 ## Setup & Installation
 
 ### Voraussetzungen
