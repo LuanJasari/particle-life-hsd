@@ -8,14 +8,22 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+
+    # WICHTIG: Das hier hat gefehlt. Wir sagen GitHub, wo der Code liegt.
+    defaults:
+      run:
+        working-directory: ./particle-life-hsd
+
     strategy:
+      fail-fast: false
       matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ["3.13"]
 
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
@@ -24,15 +32,12 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install ruff pytest numpy
-        # Falls requirements.txt existiert: pip install -r requirements.txt
+        pip install -r requirements.txt
 
     - name: Lint with Ruff
       run: |
-        # Zeigt Fehler an, bricht aber (erstmal) nicht ab
-        ruff check . || true 
+        ruff check .
 
     - name: Test with pytest
       run: |
-        # Führt Tests aus
-        pytest || true
+        pytest
