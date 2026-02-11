@@ -1,19 +1,3 @@
-Hier ist der nächste logische Schritt für die Note 1.0.
-
-Wir haben den Code (die "Maschine") poliert. Jetzt müssen wir das "Benutzerhandbuch" und die "Verkaufsbroschüre" schreiben. Deine aktuelle `README.md` ist zu dünn. Sie erfüllt die formale Anforderung nach "Nutzer- und Developer-Dokumentation"  kaum.
-
-Hier ist die **perfekte `README.md**` zum Copy-Pasten. Sie deckt strategisch alle Punkte ab, die der Prof sehen will:
-
-1. **Badge** (wirkt professionell).
-2. **Bedienungsanleitung** (beweist die GUI/Interaktivität).
-3. **Developer-Guide** (erklärt Numba und Architektur).
-4. **Wissenschaftlicher Anstrich** (erklärt die Matrix).
-
-### 1. Die neue `README.md`
-
-Ersetze den gesamten Inhalt deiner `README.md` hiermit:
-
-```markdown
 # 🧬 Particle Life Simulator (High-Performance Edition)
 
 ![Python](https://img.shields.io/badge/Python-3.13-blue)
@@ -138,5 +122,3 @@ ruff check .
 * tjdrjsdl
 * LuanJasari
 * Tymauricee
-
-```
