@@ -15,7 +15,7 @@ def main():
     DT = 0.001  # Zeitschritt
     MAX_R = 0.15  # Radius der Wahrnehmung
     FRICTION = 0.1  # Reibung (0.0 = keine, 1.0 = Klebstoff)
-
+    NOISE = 0.02
     # 2. Initialisierung Backend
     print("-> Initialisiere Partikel...")
     particles = ParticleSystem(NUMBER_OF_PARTICLES, NUMBER_OF_TYPES)
