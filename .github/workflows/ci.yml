@@ -8,37 +8,35 @@ on:
 
 jobs:
   build:
-
+    # WICHTIG: Hier nutzen wir die Matrix-Variable statt fest 'ubuntu-latest'
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false # Wenn Windows scheitert, testen wir Ubuntu trotzdem weiter
+      fail-fast: false
       matrix:
-
+        # PFLICHT: Alle 3 Betriebssysteme definieren
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ["3.13"]
 
     steps:
     - uses: actions/checkout@v3
-
+    
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
 
-
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        # Wir nutzen requirements.txt, damit Numba und Vispy korrekt installiert werden
         pip install -r requirements.txt
-        # Falls requirements.txt fehlt oder Probleme macht, hier die Fallback-Liste nutzen:
-        # pip install ruff pytest numpy numba vispy pyqt5
-
 
     - name: Lint with Ruff
       run: |
+        # KEIN "|| true" -> Fehler sollen den Build stoppen
         ruff check .
-
 
     - name: Test with pytest
       run: |
+        # KEIN "|| true" -> Fehler sollen den Build stoppen
         pytest
