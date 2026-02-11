@@ -14,7 +14,6 @@ class SimpleParticleMock:
 class SimpleInteractionMock:
     """Mock für die Interaktionsmatrix."""
     def __init__(self, rule_value):
-        # Numba-Simulation erwartet ein .matrix Attribut
         self.matrix = np.full((4, 4), rule_value, dtype=float)
 
 
@@ -26,39 +25,33 @@ def basic_simulation():
 
     dt = 0.1
     max_r = 0.5
-    friction = 0.0 # Reibung auf 0 für einfachere Berechnung
+    friction = 0.0 # Keine Reibung für deterministische Tests
+    noise = 0.0    # Kein Zufall für deterministische Tests
 
     mock_particles = SimpleParticleMock(positions, types)
     mock_interaction = SimpleInteractionMock(rule_value=1.0) # Anziehung
 
-    return Simulation(dt, max_r, friction, mock_particles, mock_interaction)
+    # Aktualisierte Signatur inklusive noise
+    return Simulation(dt, max_r, friction, noise, mock_particles, mock_interaction)
 
 
 def test_simulation_step_behavior(basic_simulation):
     """Prüft, ob ein step() die Positionen und Geschwindigkeiten verändert."""
     sim = basic_simulation
-    
-    # Vor dem Schritt
     old_pos = sim.particles.positions.copy()
     
-    # Physik ausführen
     sim.step()
     
-    # 1. Check: Haben sich die Teilchen bewegt?
     assert not np.array_equal(sim.particles.positions, old_pos)
-    
-    # 2. Check: Haben sie eine Geschwindigkeit bekommen?
-    # Bei Anziehung müssen sie sich aufeinander zu bewegen
-    assert sim.particles.velocities[0, 0] > 0 # P0 bewegt sich nach rechts (+)
-    assert sim.particles.velocities[1, 0] < 0 # P1 bewegt sich nach links (-)
+    assert sim.particles.velocities[0, 0] > 0 # P0 bewegt sich nach rechts
+    assert sim.particles.velocities[1, 0] < 0 # P1 bewegt sich nach links
 
 def test_no_interaction_outside_max_r_step(basic_simulation):
     """Prüft, ob Teilchen außerhalb von max_r ignoriert werden."""
     sim = basic_simulation
-    sim.max_r = 0.05 # Radius viel kleiner als Abstand (0.2)
+    sim.max_r = 0.05 # Radius kleiner als Abstand
     
     sim.step()
     
-    # Ohne Interaktion und ohne Reibung darf keine Geschwindigkeit entstehen
     assert np.all(sim.particles.velocities == 0.0)
     assert np.all(sim.particles.positions[0] == [0.4, 0.5])
