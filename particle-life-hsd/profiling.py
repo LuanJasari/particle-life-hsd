@@ -1,4 +1,4 @@
-import cProfile
+﻿import cProfile
 import pstats
 import time
 from particles import ParticleSystem
