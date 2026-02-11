@@ -5,16 +5,17 @@ from visualisation import Visualizer
 
 
 def main():
-    print("=== Particle Life Simulator (Milestone 3 Build) ===")
+    print("=== Particle Life Simulator (Milestone 4 Build) ===")
 
     # 1. Konfiguration
-    NUMBER_OF_PARTICLES = 2000  # Startwert für flüssige 60 FPS
-    NUMBER_OF_TYPES = 4
+    NUMBER_OF_PARTICLES = 2000  # Startwert für die Simulation
+    [cite_start]NUMBER_OF_TYPES = 4         # Mindestens 4 Typen gefordert [cite: 36]
 
-    # Physik-Parameter (Experimentiere hiermit für cooles Verhalten!)
-    DT = 0.001  # Zeitschritt
-    MAX_R = 0.15  # Radius der Wahrnehmung
-    FRICTION = 0.1  # Reibung (0.0 = keine, 1.0 = Klebstoff)
+    # Physik-Parameter
+    DT = 0.001       # Zeitschritt
+    MAX_R = 0.15     # Radius der Wahrnehmung
+    FRICTION = 0.1   # Reibung
+    [cite_start]NOISE = 0.02     # Zusätzliche Zufallsbewegung für emergentes Verhalten [cite: 39]
 
     # 2. Initialisierung Backend
     print("-> Initialisiere Partikel...")
@@ -23,11 +24,9 @@ def main():
     print("-> Initialisiere Regeln...")
     interactions = Interaction(NUMBER_OF_TYPES)
 
-
-    #interactions.matrix = np.random.uniform(-0.5, 1.0, size=(NUMBER_OF_TYPES, NUMBER_OF_TYPES))
-
     print("-> Starte Physik-Engine...")
-    sim = Simulation(DT, MAX_R, FRICTION, particles, interactions)
+    # Übergabe der Parameter inklusive Noise an die Simulation
+    sim = Simulation(DT, MAX_R, FRICTION, NOISE, particles, interactions)
 
     # 3. Start Frontend
     print("-> Öffne Fenster (Vispy)...")
