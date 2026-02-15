@@ -45,8 +45,8 @@ Um die Effizienz der Optimierung zu beweisen, wurde ein standardisiertes Profili
 ### Installation
 ```bash
 # Repository klonen
-git clone [https://github.com/LuanJasari/particle-life-hsd.git](https://github.com/LuanJasari/particle-life-hsd.git)
-cd particle-life-hsd
+git clone [https://github.com/LuanJasari/src.git](https://github.com/LuanJasari/particle-life-hsd.git)
+cd src
 
 # Abhängigkeiten installieren
 pip install -r requirements.txt

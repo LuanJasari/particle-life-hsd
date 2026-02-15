@@ -13,7 +13,7 @@ jobs:
     # WICHTIG: Das hier hat gefehlt. Wir sagen GitHub, wo der Code liegt.
     defaults:
       run:
-        working-directory: ./particle-life-hsd
+        working-directory: ./src
 
     strategy:
       fail-fast: false
