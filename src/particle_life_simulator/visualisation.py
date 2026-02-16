@@ -13,7 +13,7 @@ class Visualizer:
     def __init__(self, simulation, width=800, height=800):
         """
         Initialisiert das Visualisierungs-Fenster und die Szene.
-
+ 
         Args:
             simulation (Simulation): Die Instanz der Physik-Simulation.
             width (int, optional): Breite des Fensters in Pixeln. Default: 800.
