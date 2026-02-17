@@ -5,7 +5,7 @@ from .visualisation import Visualizer
 
 def main():
     print("=== Particle Life Simulator (Milestone 4 Build) ===")
-
+ 
     # 1. Konfiguration
     NUMBER_OF_PARTICLES = 2000  # Zielwert für Performance-Optimierung [cite: 40]
     NUMBER_OF_TYPES = 4         # Mindestens 4 Typen erforderlich [cite: 36]
