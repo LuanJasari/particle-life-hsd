@@ -1,6 +1,0 @@
-numpy
-ruff
-vispy
-pyqt5
-pytest
-numba
