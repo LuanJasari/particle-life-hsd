@@ -1,7 +1,7 @@
-from particles import ParticleSystem
-from interaction import Interaction
-from simulation import Simulation
-from visualisation import Visualizer
+from .particles import ParticleSystem
+from .interaction import Interaction
+from .simulation import Simulation
+from .visualisation import Visualizer
 
 def main():
     print("=== Particle Life Simulator (Milestone 4 Build) ===")
