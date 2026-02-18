@@ -21,7 +21,7 @@ class Visualizer:
         """
         self.simulation = simulation
         
-        # Canvas erstellen mit interaktiven Keys
+        #interaktivität
         self.canvas = scene.SceneCanvas(keys='interactive', size=(width, height), show=True, bgcolor='black')
         self.canvas.title = "Particle Life - Press 'H' for Help"
         
@@ -29,12 +29,12 @@ class Visualizer:
         self.view = self.canvas.central_widget.add_view()
         self.view.camera = scene.PanZoomCamera(rect=(0, 0, 1, 1))
 
-        # Partikel-Visualisierung (Scatter Plot)
+        # Partikel-Visualisierung 
         self.scatter = scene.visuals.Markers()
         self.view.add(self.scatter)
 
         # Farben vorbereiten (Mapping von Typ-ID zu RGBA)
-        # 0=Rot, 1=Grün, 2=Blau, 3=Weiß/Gelb
+        # 0=Rot, 1=Grün, 2=Blau, 3=weiß
         base_colors = np.array([
             [1.0, 0.2, 0.2, 1.0],  # Rot
             [0.2, 1.0, 0.2, 1.0],  # Grün
@@ -42,7 +42,7 @@ class Visualizer:
             [1.0, 1.0, 1.0, 1.0]   # Weiß
         ])
         
-        # Wir speichern die Farben basierend auf den fixen Typen der Partikel
+        # Wir speichern die Farben basierend auf den Typen der Partikel
         self.particle_colors = base_colors[self.simulation.particles.types]
         
         # Timer für die Animationsschleife (ca. 60 FPS)
@@ -69,7 +69,7 @@ class Visualizer:
             else:
                 self.timer.start()
         
-        # 2. Reibung (Friction) ändern
+        # 2. Reibung ändern
         elif event.text == 'f':
             self.simulation.friction = min(1.0, self.simulation.friction + 0.05)
             print(f"Friction erhöht: {self.simulation.friction:.2f}")
@@ -117,7 +117,7 @@ class Visualizer:
         # Physik berechnen (Model update)
         self.simulation.update_positions()
 
-        # Grafik aktualisieren (View update)
+        # Grafik aktualisieren
         self.scatter.set_data(
             pos=self.simulation.particles.positions,
             edge_width=0,
@@ -125,7 +125,7 @@ class Visualizer:
             size=8
         )
         
-        # Status im Fenstertitel anzeigen (nicht jeden Frame, kostet Performance)
+        # Status im Fenstertitel anzeigen
         if self.frame_count % 30 == 0:
             fps = self.canvas.fps
             title = (f"FPS: {fps:.1f} | "
