@@ -18,19 +18,17 @@ class SimpleInteractionMock:
 
 @pytest.fixture
 def basic_simulation():
-    # Zwei Partikel: P0 bei (0.4, 0.5), P1 bei (0.6, 0.5) -> Abstand 0.2
     positions = np.array([[0.4, 0.5], [0.6, 0.5]])
     types = np.array([0, 0])
 
     dt = 0.1
     max_r = 0.5
-    friction = 0.0 # Keine Reibung für deterministische Tests
-    noise = 0.0    # Kein Zufall für deterministische Tests
+    friction = 0.0 
+    noise = 0.0    
 
     mock_particles = SimpleParticleMock(positions, types)
-    mock_interaction = SimpleInteractionMock(rule_value=1.0) # Anziehung
+    mock_interaction = SimpleInteractionMock(rule_value=1.0)
 
-    # Aktualisierte Signatur inklusive noise
     return Simulation(dt, max_r, friction, noise, mock_particles, mock_interaction)
 
 
@@ -42,13 +40,13 @@ def test_simulation_step_behavior(basic_simulation):
     sim.step()
     
     assert not np.array_equal(sim.particles.positions, old_pos)
-    assert sim.particles.velocities[0, 0] > 0 # P0 bewegt sich nach rechts
-    assert sim.particles.velocities[1, 0] < 0 # P1 bewegt sich nach links
+    assert sim.particles.velocities[0, 0] > 0 
+    assert sim.particles.velocities[1, 0] < 0 
 
 def test_no_interaction_outside_max_r_step(basic_simulation):
     """Prüft, ob Teilchen außerhalb von max_r ignoriert werden."""
     sim = basic_simulation
-    sim.max_r = 0.05 # Radius kleiner als Abstand
+    sim.max_r = 0.05 
     
     sim.step()
     
