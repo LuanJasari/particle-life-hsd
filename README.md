@@ -1,128 +1,207 @@
 🧬 Particle Life Simulator (High-Performance Edition)
 📄 Projektbeschreibung
 
-Dieses Projekt implementiert eine hochperformante Particle-Life-Simulation im Rahmen des Moduls "Data Science und KI Infrastrukturen". Ziel ist die Simulation von emergentem Verhalten durch die Interaktion tausender Partikel basierend auf einfachen physikalischen Regeln (Anziehung/Abstoßung).
+Dieses Projekt implementiert eine hochperformante Particle-Life-Simulation im Rahmen des Moduls „Data Science und KI Infrastrukturen“. Ziel ist die Simulation emergenten Verhaltens durch die Interaktion tausender Partikel auf Basis einfacher physikalischer Regeln (Anziehung und Abstoßung).
 
-Die Software wurde mit Fokus auf Performance (Numba JIT), Clean Code und Interaktivität (Vispy) entwickelt.
+Die Software wurde mit besonderem Fokus auf Performance (Numba JIT), saubere Architektur (Model-View-Pattern) und GPU-beschleunigte Visualisierung (Vispy/OpenGL) entwickelt.
+
+🧠 Physikalische Logik
+
+Die Simulation basiert auf einem vereinfachten, nicht-newtonschen Partikelmodell mit periodischen Randbedingungen (Torus-Geometrie).
+
+1️⃣ Geometrie – Periodische Randbedingungen
+
+Der Simulationsraum ist das Intervall:
+
+[0,1] × [0,1]
+
+
+Es existieren keine Wände. Stattdessen wird eine Torus-Topologie verwendet:
+
+Verlässt ein Partikel rechts den Raum, erscheint es links wieder.
+
+Verlässt es oben den Raum, erscheint es unten wieder.
+
+Kräfte wirken ebenfalls über die Randgrenzen hinweg.
+
+Die Distanz wird stets als kürzester Weg auf dem Torus berechnet.
+
+2️⃣ Kraftmodell
+
+Für zwei Partikel i und j gilt:
+
+F(r) = A_ij * (1 - r / R),  für r < R
+F(r) = 0                    sonst
+
+
+Dabei gilt:
+
+r = Abstand zwischen Partikeln
+
+R = max_r (Interaktionsradius)
+
+A_ij = Eintrag in der Interaktionsmatrix
+
+Eigenschaften des Modells:
+
+Lineare Kraftabnahme
+
+Keine Singularität bei r → 0
+
+Numerisch stabil
+
+Kompakte Wechselwirkungszone
+
+Asymmetrische Interaktionen erlaubt
+
+Das System ist bewusst nicht newtonsch:
+
+Wenn A von B angezogen wird, muss B nicht zwingend von A angezogen werden.
+Dies erzeugt das charakteristische „Jagen“-Verhalten und komplexe emergente Muster.
+
+3️⃣ Numerische Integration
+
+Die Bewegungsgleichungen werden mittels explizitem Euler-Verfahren integriert:
+
+v(t+1) = (1 - γ dt) v(t) + F dt
+x(t+1) = x(t) + v(t+1) dt
+
+
+Dabei:
+
+γ = friction (Dämpfung)
+
+dt = Zeitschritt
+
+Die Dämpfung sorgt für Stabilität und verhindert Energieexplosion.
+
+4️⃣ Algorithmische Komplexität
+
+Die Kraftberechnung erfolgt paarweise:
+
+O(N²)
+
+
+Das bedeutet:
+
+Jeder Partikel interagiert mit jedem anderen.
+
+Für N Partikel entstehen N² Interaktionen pro Frame.
+
+Durch Nutzung von Numba JIT (nopython=True) wird der Python-Overhead vollständig eliminiert, wodurch C++-ähnliche Performance erreicht wird.
+
 🚀 Features
 
-    Massive Simulation: Flüssige Berechnung von 2.000 Partikeln in Echtzeit.
+Massive Simulation: Flüssige Berechnung von 2.000 Partikeln in Echtzeit
 
-    High-Performance Backend: Nutzung von numpy und numba (Just-in-Time Kompilierung) für C++-ähnliche Geschwindigkeit.
+High-Performance Backend: numpy + numba
 
-    GPU-Rendering: Visualisierung mittels vispy (OpenGL) für maximale Framerates.
+GPU-Rendering: vispy (OpenGL)
 
-    Interaktive Steuerung: Echtzeit-Manipulation von physikalischen Parametern (Reibung, Radius, Chaos-Modus).
+Interaktive Parametersteuerung
 
-    Robustheit: Abgesichert durch Unit-Tests (pytest) und Continuous Integration (GitHub Actions).
+Unit-Tests mit pytest
+
+Continuous Integration via GitHub Actions
+
+Clean Code & modulare Architektur
 
 📊 Performance Benchmarks
+Test-Szenario
 
-Um die Effizienz der Optimierung zu beweisen, wurde ein standardisiertes Profiling durchgeführt (Script: profiling.py). Die Ergebnisse belegen, dass der Python-Interpreter-Overhead durch numba eliminiert wurde.
+1.500 Partikel
 
-Test-Szenario:
+200 Zeitschritte (Headless Mode)
 
-    Anzahl Partikel: 1.500
+O(N²) Interaktionen
 
-    Zeitschritte: 200 (Headless Mode)
+Ergebnisse
 
-    Komplexität: O(N2) Interaktionen pro Frame
+Durchschnittliche Framerate: 80.40 FPS
 
-Ergebnisse:
+Berechnungszeit pro Frame: ~12 ms
 
-    Durchschnittliche Framerate: 80.40 FPS
+99% der Rechenzeit innerhalb des kompilierten JIT-Kernels
 
-    Berechnungszeit pro Frame: ~12 ms
-
-    Bottleneck-Analyse: >99% der Rechenzeit finden innerhalb der kompilierten step()-Funktion statt (No Python Overhead).
+Kein messbarer Python-Interpreter-Overhead
 
 🛠 Installation & Setup
-Voraussetzungen für die Ausführung
-    
-    Python 3.12
+Voraussetzungen
 
-    Git im System-Pfad (Path)
-   
-    Aktive Virtuelle Umgebung (venv oder conda)
+Python 3.12
 
-    Grafiktreiber mit OpenGL-Unterstützung
+Git im System-Pfad
 
-Installation als fertiges Python-Package und Ausführung
+Virtuelle Umgebung (venv oder conda)
 
-# Das Paket systemweit 
+OpenGL-fähiger Grafiktreiber
+
+Installation
 pip install git+https://github.com/LuanJasari/particle-life-hsd.git
 
-# Die Simulation direkt über das Terminal starten
+
+Starten:
+
 particle-life
 
 🎮 Steuerung (GUI)
-
-Die Simulation kann während der Laufzeit über die Tastatur gesteuert werden, um das Verhalten der Partikel zu untersuchen.
 Taste	Funktion	Beschreibung
-SPACE	Pause / Play	Stoppt oder startet die Zeitrechnung.
-F	Reibung +	Erhöht die Reibung (Partikel werden langsamer).
-G	Reibung -	Verringert die Reibung (Partikel gleiten länger).
-R	Radius +	Vergrößert den Wahrnehmungsradius (Max_R).
-T	Radius -	Verkleinert den Wahrnehmungsradius.
-M	Matrix-Shuffle	Würfelt die Interaktionsregeln zufällig neu (Chaos!).
-ESC	Beenden	Schließt das Fenster sauber.
+SPACE	Pause / Play	Stoppt oder startet die Zeit
+F	Reibung +	Erhöht die Dämpfung
+G	Reibung -	Verringert die Dämpfung
+R	Radius +	Vergrößert max_r
+T	Radius -	Verkleinert max_r
+M	Matrix Shuffle	Neue zufällige Interaktionsmatrix
+ESC	Beenden	Schließt das Fenster
 
 Der aktuelle Status (FPS, Reibung, Radius) wird im Fenstertitel angezeigt.
-⚙️ Developer Guide & Architektur
-1. Architektur-Übersicht
 
-Das Projekt folgt dem Model-View-Pattern, um Logik und Darstellung strikt zu trennen:
+⚙️ Architektur (Model-View-Pattern)
+main.py
 
-    main.py: Einstiegspunkt. Initialisiert System und Visualizer.
+Initialisiert Simulation und Visualizer.
 
-    particles.py: Datencontainer. Verwaltet die Zustands-Arrays (Positionen, Geschwindigkeiten) mittels numpy. Es gibt keine Python-Objekte pro Partikel (Memory Optimization).
+particles.py
 
-    simulation.py (Model): Die Physik-Engine. Enthält den @jit-optimierten Algorithmus.
+Verwaltet Zustandsarrays:
 
-    interaction.py: Verwaltet die Regel-Matrix (wer zieht wen an?).
+Positionen (Nx2 NumPy Array)
 
-    visualisation.py (View): Handhabt das OpenGL-Fenster und Inputs via vispy.
+Geschwindigkeiten (Nx2 NumPy Array)
 
-2. Performance-Optimierung (Numba)
+Typen (N Array)
 
-Die größte Herausforderung ist die Berechnung der Kräfte zwischen allen Partikel-Paaren ().
+Keine Python-Objekte pro Partikel → Speicheroptimierung.
 
-    Problem: Reines Python ist für verschachtelte Schleifen zu langsam.
+simulation.py (Model)
 
-    Lösung: Wir nutzen den @jit(nopython=True) Dekorator von Numba.
+Enthält den JIT-kompilierten Physik-Kernel.
 
-    Effekt: Der Python-Bytecode wird zur Laufzeit in optimierten Maschinencode kompiliert.
+interaction.py
 
-3. Die Interaktions-Matrix
+Verwaltet die asymmetrische Interaktionsmatrix.
 
-Die Regeln werden in einer asymmetrischen Matrix gespeichert.
+visualisation.py (View)
 
-    Ein Wert von 1.0 bedeutet maximale Anziehung.
-
-    Ein Wert von -1.0 bedeutet maximale Abstoßung.
-
-    Das System ist nicht newtonsch: Wenn A von B angezogen wird, muss B nicht zwingend von A angezogen werden. Dies erzeugt das komplexe "Jagen"-Verhalten.
+OpenGL-Rendering und Input-Handling via vispy.
 
 🧪 Testing & Qualitätssicherung
 
-Das Projekt nutzt pytest für Unit-Tests und ruff für das Linting. Die Tests decken die physikalische Korrektheit und die Datenstrukturen ab.
-
-Tests ausführen (inkl. Coverage zur Überprüfung der 70%-Hürde):
-Bash
+Unit-Tests mit pytest:
 
 poetry run pytest --cov=particle_life_simulator
 
-Linter prüfen:
-Bash
+
+Linting mit ruff:
 
 poetry run ruff check .
 
 👥 Team
 
-    Baoevran
+Baoevran
 
-    tjdrjsdl
+tjdrjsdl
 
-    LuanJasari
+LuanJasari
 
-    Tymauricee
+Tymauricee
