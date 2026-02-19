@@ -6,17 +6,20 @@ class Simulation:
     """
     High-Performance Implementierung der Physik mit Numba JIT.
     Statt speicherintensiver Matrizen nutzen wir kompilierte Schleifen.
-    Die Formatierung folgt den Clean-Code-Vorgaben des Moduls[cite: 4, 47].
     """
 
-    def __init__(self, dt, max_r, friction, noise, particles, interactions):
+    def __init__(self, dt, max_r, friction, particles, interactions):
         """
-        Initialisiert die Simulation mit physikalischen Parametern.
+        Args:
+            dt: Der Zeitschritt
+            max_r: Maximale Raum für eine Interaktion
+            friction: Die Reibung, die die Geschwindigkeit verringern soll
+
+
         """
         self.dt = dt
         self.max_r = max_r
         self.friction = friction
-        self.noise = noise
         self.particles = particles
         self.interaction = interactions
 
@@ -38,7 +41,6 @@ class Simulation:
             self.max_r,
             self.dt,
             self.friction,
-            self.noise
         )
 
         # 3. Wrapping (Randbedingung: Partikel bleiben im Bereich 0.0-1.0)
@@ -60,10 +62,9 @@ class Simulation:
 
 
 @jit(nopython=True, fastmath=True)
-def update_physics_numba(positions, velocities, types, rules, max_r, dt, friction, noise):
+def update_physics_numba(positions, velocities, types, rules, max_r, dt, friction):
     """
     Numba JIT Kernel zur Berechnung der Interaktionen.
-    Die Struktur wurde angepasst, um E701-Linter-Fehler zu vermeiden.
     """
     n_particles = len(positions)
 
@@ -84,7 +85,7 @@ def update_physics_numba(positions, velocities, types, rules, max_r, dt, frictio
             dx = positions[j, 0] - pos_x_i
             dy = positions[j, 1] - pos_y_i
 
-            # 2. Wrap-Around (Torus-Welt) berücksichtigen
+            # 2. Wrap-Around berücksichtigen
             if dx > 0.5:
                 dx -= 1.0
             elif dx < -0.5:
@@ -102,7 +103,7 @@ def update_physics_numba(positions, velocities, types, rules, max_r, dt, frictio
                 dist = np.sqrt(dist_sq)
 
                 # 4. Kraft berechnen (F = rule * (1 - dist/max_r))
-                # Die Regel wird aus der Interaktionsmatrix bezogen[cite: 34, 184].
+                # Regel wird aus der Interaktionsmatrix bezogen
                 force_val = rules[type_i, types[j]] * (1.0 - (dist / max_r))
 
                 # Vektor normalisieren und Kraft anwenden
@@ -114,13 +115,8 @@ def update_physics_numba(positions, velocities, types, rules, max_r, dt, frictio
         velocities[i, 0] *= (1.0 - friction * dt)
         velocities[i, 1] *= (1.0 - friction * dt)
 
-        # Kräfte und Noise auf Geschwindigkeit anwenden
-        # Noise sorgt für die geforderte zusätzliche Zufallsbewegung[cite: 39].
-        v_noise_x = (np.random.random() * 2.0 - 1.0) * noise
-        v_noise_y = (np.random.random() * 2.0 - 1.0) * noise
-
-        velocities[i, 0] += (total_force_x + v_noise_x) * dt
-        velocities[i, 1] += (total_force_y + v_noise_y) * dt
+        velocities[i, 0] += total_force_x * dt
+        velocities[i, 1] += total_force_y * dt
 
     # 6. Geschwindigkeit auf Position anwenden
     for i in range(n_particles):
