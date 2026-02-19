@@ -31,7 +31,7 @@ class Visualizer:
 
         # Partikel-Visualisierung 
         self.scatter = scene.visuals.Markers()
-        self.view.add(self.scatter)
+        self.view.add(self.scatter) 
 
         # Farben vorbereiten (Mapping von Typ-ID zu RGBA)
         # 0=Rot, 1=Grün, 2=Blau, 3=weiß
