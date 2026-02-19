@@ -4,10 +4,6 @@ from particle_life_simulator.interaction import Interaction
 
 @pytest.fixture
 def interaction():
-    """
-    Creates an Interaction instance and overwrites specific rules
-    so the tests have deterministic values to check against.
-    """
     inter = Interaction(num_types=4)
     
     inter.set_rule(0, 1, -0.9)
