@@ -52,3 +52,17 @@ def test_no_interaction_outside_max_r_step(basic_simulation):
     
     assert np.all(sim.particles.velocities == 0.0)
     assert np.all(sim.particles.positions[0] == [0.4, 0.5])
+
+def test_simulation_wrapper_methods(basic_simulation):
+    """Prüft, ob die Wrapper-Methoden für die Visualisierung fehlerfrei aufgerufen werden."""
+    sim = basic_simulation
+    old_pos = sim.particles.positions.copy()
+    
+    # Aufruf der leeren Wrapper
+    sim.update_accelerations()
+    sim.update_velocities()
+    
+    # Aufruf der Positionen (triggert intern step)
+    sim.update_positions()
+    
+    assert not np.array_equal(sim.particles.positions, old_pos)
