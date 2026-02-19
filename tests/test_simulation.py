@@ -24,7 +24,7 @@ def basic_simulation():
     dt = 0.1
     max_r = 0.5
     friction = 0.0 
-    noise_strength = 0.0 # Für deterministische Tests auf 0 setzen
+    noise_strength = 0.0 
 
     mock_particles = SimpleParticleMock(positions, types)
     mock_interaction = SimpleInteractionMock(rule_value=1.0)
@@ -58,11 +58,9 @@ def test_simulation_wrapper_methods(basic_simulation):
     sim = basic_simulation
     old_pos = sim.particles.positions.copy()
     
-    # Aufruf der leeren Wrapper
     sim.update_accelerations()
     sim.update_velocities()
     
-    # Aufruf der Positionen (triggert intern step)
     sim.update_positions()
     
     assert not np.array_equal(sim.particles.positions, old_pos)
