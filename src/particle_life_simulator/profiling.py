@@ -1,4 +1,11 @@
-﻿import cProfile
+"""
+Profiling-Skript für den Particle Life Simulator.
+
+Dieses Skript dient zur Messung und Analyse der Performance der physikalischen
+Simulation (insbesondere der durch Numba optimierten Funktionen). Er gibt
+detaillierte Statistiken zu den Laufzeiten und Bottlenecks auf der Konsole aus.
+"""
+import cProfile
 import pstats
 import time
 from particles import ParticleSystem
@@ -7,6 +14,14 @@ from simulation import Simulation
 
   
 def profile_simulation():
+    """
+    Führt das Performance-Profiling der Simulation durch.
+    
+    Initialisiert ein Partikelsystem mit hoher Last und simuliert eine
+    festgelegte Anzahl an Zeitschritten. Ein JIT-Warmup wird vorab ausgeführt, 
+    damit die initiale Kompilierungszeit von Numba die Leistungsmessung 
+    nicht verfälscht.
+    """
     print("=== Performance Profiling (Milestone 4) ===")
 
     # 1. Setup: Hohe Last für deutliche Signale
