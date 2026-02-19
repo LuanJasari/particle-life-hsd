@@ -1,54 +1,118 @@
 import numpy as np
-import pytest
-from particle_life_simulator.simulation import Simulation
+from numba import jit
 
-class SimpleParticleMock:
-    """Simuliert ein Partikel-System für den Test."""
-    def __init__(self, pos, types):
-        self.positions = np.array(pos, dtype=float)
-        self.types = np.array(types, dtype=int)
-        self.velocities = np.zeros_like(self.positions)
-        self.accelerations = np.zeros_like(self.positions)
+class Simulation:
+    """
+    High-Performance Implementierung der Physik mit Numba JIT.
+    Statt speicherintensiver Matrizen nutzen wir kompilierte Schleifen.
+    """
 
-class SimpleInteractionMock:
-    """Mock für die Interaktionsmatrix."""
-    def __init__(self, rule_value):
-        self.matrix = np.full((4, 4), rule_value, dtype=float)
+    def __init__(self, dt, max_r, friction, noise_strength, particles, interactions):
+        """
+        Args:
+            dt: Der Zeitschritt
+            max_r: Maximale Raum für eine Interaktion
+            friction: Die Reibung, die die Geschwindigkeit verringern soll
+            noise_strength: Stärke der stochastischen Zufallsbewegung
+            particles: Das Partikelsystem
+            interactions: Die Interaktionsmatrix
+        """
+        self.dt = dt
+        self.max_r = max_r
+        self.friction = friction
+        self.noise_strength = noise_strength
+        self.particles = particles
+        self.interaction = interactions
+
+    def step(self):
+        """Führt einen kompletten Simulationsschritt durch."""
+
+        # 1. Daten für Numba vorbereiten (NumPy Arrays extrahieren)
+        positions = self.particles.positions
+        velocities = self.particles.velocities
+        types = self.particles.types
+        rules = self.interaction.matrix
+
+        # 2. Die physikalischen Berechnungen an Numba delegieren
+        update_physics_numba(
+            positions,
+            velocities,
+            types,
+            rules,
+            self.max_r,
+            self.dt,
+            self.friction,
+            self.noise_strength,
+        )
+
+        # 3. Wrapping (Randbedingung: Partikel bleiben im Bereich 0.0-1.0)
+        self.particles.positions %= 1.0
+
+    # Wrapper-Methoden für Kompatibilität mit dem Visualizer
+    def update_accelerations(self):
+        pass
+
+    def update_velocities(self):
+        pass
+
+    def update_positions(self):
+        self.step()
 
 
-@pytest.fixture
-def basic_simulation():
-    positions = np.array([[0.4, 0.5], [0.6, 0.5]])
-    types = np.array([0, 0])
+@jit(nopython=True, fastmath=True)
+def update_physics_numba(positions, velocities, types, rules, max_r, dt, friction, noise_strength):
+    """
+    Numba JIT Kernel zur Berechnung der Interaktionen inkl. Zufallsbewegung.
+    """
+    n_particles = len(positions)
 
-    dt = 0.1
-    max_r = 0.5
-    friction = 0.0 
-    noise_strength = 0.0 # Für deterministische Tests auf 0 setzen
+    for i in range(n_particles):
+        total_force_x = 0.0
+        total_force_y = 0.0
 
-    mock_particles = SimpleParticleMock(positions, types)
-    mock_interaction = SimpleInteractionMock(rule_value=1.0)
+        pos_x_i = positions[i, 0]
+        pos_y_i = positions[i, 1]
+        type_i = types[i]
 
-    return Simulation(dt, max_r, friction, noise_strength, mock_particles, mock_interaction)
-    
+        for j in range(n_particles):
+            if i == j:
+                continue
 
-def test_simulation_step_behavior(basic_simulation):
-    """Prüft, ob ein step() die Positionen und Geschwindigkeiten verändert."""
-    sim = basic_simulation
-    old_pos = sim.particles.positions.copy()
-    
-    sim.step()
-    
-    assert not np.array_equal(sim.particles.positions, old_pos)
-    assert sim.particles.velocities[0, 0] > 0 
-    assert sim.particles.velocities[1, 0] < 0 
+            dx = positions[j, 0] - pos_x_i
+            dy = positions[j, 1] - pos_y_i
 
-def test_no_interaction_outside_max_r_step(basic_simulation):
-    """Prüft, ob Teilchen außerhalb von max_r ignoriert werden."""
-    sim = basic_simulation
-    sim.max_r = 0.05 
-    
-    sim.step()
-    
-    assert np.all(sim.particles.velocities == 0.0)
-    assert np.all(sim.particles.positions[0] == [0.4, 0.5])
+            if dx > 0.5:
+                dx -= 1.0
+            elif dx < -0.5:
+                dx += 1.0
+
+            if dy > 0.5:
+                dy -= 1.0
+            elif dy < -0.5:
+                dy += 1.0
+
+            dist_sq = dx * dx + dy * dy
+
+            if dist_sq > 0 and dist_sq < (max_r * max_r):
+                dist = np.sqrt(dist_sq)
+                force_val = rules[type_i, types[j]] * (1.0 - (dist / max_r))
+                total_force_x += (dx / dist) * force_val
+                total_force_y += (dy / dist) * force_val
+
+        # 5. Integration (Euler) inkl. Reibung und Zufallsbewegung
+        velocities[i, 0] *= (1.0 - friction * dt)
+        velocities[i, 1] *= (1.0 - friction * dt)
+
+        # Deterministische Kraft
+        velocities[i, 0] += total_force_x * dt
+        velocities[i, 1] += total_force_y * dt
+        
+        # Stochastische Kraft (Noise)
+        if noise_strength > 0.0:
+            velocities[i, 0] += (np.random.rand() - 0.5) * noise_strength * dt
+            velocities[i, 1] += (np.random.rand() - 0.5) * noise_strength * dt
+
+    # 6. Geschwindigkeit auf Position anwenden
+    for i in range(n_particles):
+        positions[i, 0] += velocities[i, 0] * dt
+        positions[i, 1] += velocities[i, 1] * dt
