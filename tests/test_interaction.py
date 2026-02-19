@@ -2,7 +2,6 @@ import pytest
 import numpy as np
 from particle_life_simulator.interaction import Interaction
 
-
 @pytest.fixture
 def interaction():
     """
