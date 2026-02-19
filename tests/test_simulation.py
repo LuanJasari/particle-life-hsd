@@ -29,7 +29,7 @@ def basic_simulation():
     mock_interaction = SimpleInteractionMock(rule_value=1.0)
 
     return Simulation(dt, max_r, friction, mock_particles, mock_interaction)
-
+    
 
 def test_simulation_step_behavior(basic_simulation):
     """Prüft, ob ein step() die Positionen und Geschwindigkeiten verändert."""
