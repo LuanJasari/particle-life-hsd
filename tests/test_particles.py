@@ -39,6 +39,7 @@ def test_initial_physics_state():
     assert np.all(system.accelerations == 0.0)
 
 
+
 def test_getters():
     """Prüft, ob die Getter-Methoden die korrekten Referenzen zurückgeben."""
     system = ParticleSystem(10, 2)
