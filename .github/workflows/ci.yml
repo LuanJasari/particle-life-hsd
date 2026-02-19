@@ -30,9 +30,8 @@ jobs:
     - name: Install dependencies
       run: poetry install --no-interaction
 
-
     - name: Lint with Ruff
       run: poetry run ruff check .
 
-    - name: Test with pytest
-      run: poetry run pytest
+    - name: Test with pytest and verify coverage
+      run: poetry run pytest --cov=particle_life_simulator --cov-report=term-missing --cov-fail-under=70
