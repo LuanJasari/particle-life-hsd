@@ -6,7 +6,7 @@ Dieses Projekt implementiert eine hochperformante Particle-Life-Simulation im Ra
 Die Software wurde mit Fokus auf Performance (Numba JIT), Clean Code und Interaktivität (Vispy) entwickelt.
 🚀 Features
 
-    Massive Simulation: Flüssige Berechnung von >2.000 Partikeln in Echtzeit.
+    Massive Simulation: Flüssige Berechnung von 2.000 Partikeln in Echtzeit.
 
     High-Performance Backend: Nutzung von numpy und numba (Just-in-Time Kompilierung) für C++-ähnliche Geschwindigkeit.
 
@@ -37,27 +37,23 @@ Ergebnisse:
     Bottleneck-Analyse: >99% der Rechenzeit finden innerhalb der kompilierten step()-Funktion statt (No Python Overhead).
 
 🛠 Installation & Setup
-Voraussetzungen
+Voraussetzungen für die Ausführung
+    
+    Python 3.12
 
-    Python 3.10 oder neuer
+    Git im System-Pfad (Path)
+   
+    Aktive Virtuelle Umgebung (venv oder conda)
 
-    Empfohlen: Virtuelle Umgebung (venv oder conda)
+    Grafiktreiber mit OpenGL-Unterstützung
 
-Installation
-Bash
+Installation als fertiges Python-Package und Ausführung
 
-# Repository klonen
-git clone https://github.com/LuanJasari/particle-life-hsd.git
-cd particle-life-hsd
+# Das Paket systemweit 
+pip install git+https://github.com/LuanJasari/particle-life-hsd.git
 
-# Abhängigkeiten mit Poetry installieren
-pip install poetry
-poetry install
-
-Starten der Simulation
-Bash
-
-poetry run particle-life
+# Die Simulation direkt über das Terminal starten
+particle-life
 
 🎮 Steuerung (GUI)
 
