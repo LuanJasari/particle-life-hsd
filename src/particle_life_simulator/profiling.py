@@ -5,7 +5,7 @@ from particles import ParticleSystem
 from interaction import Interaction
 from simulation import Simulation
 
- 
+  
 def profile_simulation():
     print("=== Performance Profiling (Milestone 4) ===")
 
