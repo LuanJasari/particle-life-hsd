@@ -1,5 +1,5 @@
 import numpy as np
-from src.particle_life_simulator.particles import ParticleSystem
+from particle_life_simulator.particles import ParticleSystem
 
 def test_initialization_shapes():
     """Prüft, ob alle Arrays mit der richtigen Form (Shape) erstellt werden."""

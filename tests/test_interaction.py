@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from src.particle_life_simulator.interaction import Interaction
+from particle_life_simulator.interaction import Interaction
 
 
 @pytest.fixture

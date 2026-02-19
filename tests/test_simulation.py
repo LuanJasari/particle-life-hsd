@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from src.particle_life_simulator.simulation import Simulation
+from particle_life_simulator.simulation import Simulation
 
 class SimpleParticleMock:
     """Simuliert ein Partikel-System für den Test."""
