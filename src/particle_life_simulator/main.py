@@ -1,9 +1,23 @@
+"""
+Haupteinstiegspunkt für den Particle Life Simulator.
+
+Dieses Skript initialisiert das Partikelsystem, die physikalischen Regeln
+(Interaktionen) und die Simulationsengine. Anschließend wird die visuelle
+Darstellung (Frontend) mittels Vispy gestartet.
+"""
 from src.particle_life_simulator.particles import ParticleSystem
 from src.particle_life_simulator.interaction import Interaction
 from src.particle_life_simulator.simulation import Simulation
 from src.particle_life_simulator.visualisation import Visualizer
 
 def main():
+    """
+    Hauptfunktion zum Starten der Particle-Life-Simulation.
+    
+    Setzt die Konfigurationsparameter (Anzahl Partikel, Zeitschritt, etc.),
+    initialisiert die notwendigen Backend-Klassen (Partikel, Interaktionen, Simulation)
+    und startet das grafische Frontend in einem eigenen Fenster.
+    """
     print("=== Particle Life Simulator (Milestone 4 Build) ===")
  
     # 1. Konfiguration
@@ -14,6 +28,7 @@ def main():
     DT = 0.001       # Zeitschritt
     MAX_R = 0.15     # Radius der Wahrnehmung
     FRICTION = 0.1   # Reibung
+    NOISE = 0.0      # Stärke der stochastischen Zufallsbewegung (Bugfix ergänzt)
 
     # 2. Initialisierung Backend
     print("-> Initialisiere Partikel...")
@@ -24,7 +39,7 @@ def main():
 
     print("-> Starte Physik-Engine...") 
     # Übergabe aller Parameter inkl. Noise an die Simulation
-    sim = Simulation(DT, MAX_R, FRICTION, particles, interactions)
+    sim = Simulation(DT, MAX_R, FRICTION, NOISE, particles, interactions)
 
     # 3. Start Frontend
     print("-> Öffne Fenster (Vispy)...")
