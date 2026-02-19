@@ -5,7 +5,8 @@ description = "Particle Life Simulation"
 authors = [
     {name = "evran", email = "evran.baotatcheu@study.hs-duesseldorf.de"},
     {name = "maurice", email = "maurice.tay@study.hs-duesseldorf.de"},
-    { name = "luan", email = "luan.jasari@study.hs-duesseldorf.de" }
+    {name = "luan", email = "luan.jasari@study.hs-duesseldorf.de"},
+    {name = "tjdrjsdl", email = "tjdrjsdl@study.hs-duesseldorf.de"}
 ]
 license = "MIT"
 readme = "README.md"
@@ -16,7 +17,6 @@ dependencies = [
     "pyqt6 (>=6.10.2,<7.0.0)",
     "numba (>=0.63.1,<0.64.0)"
 ]
-
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
@@ -34,3 +34,10 @@ packages = [{include = "particle_life_simulator", from = "src"}]
 
 [project.scripts]
 particle-life = "particle_life_simulator.main:main"
+
+[tool.coverage.run]
+omit = [
+    "src/particle_life_simulator/visualisation.py",
+    "src/particle_life_simulator/main.py",
+    "src/particle_life_simulator/profiling.py"
+]
