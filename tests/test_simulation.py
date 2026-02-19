@@ -24,12 +24,11 @@ def basic_simulation():
     dt = 0.1
     max_r = 0.5
     friction = 0.0 
-    noise = 0.0    
 
     mock_particles = SimpleParticleMock(positions, types)
     mock_interaction = SimpleInteractionMock(rule_value=1.0)
 
-    return Simulation(dt, max_r, friction, noise, mock_particles, mock_interaction)
+    return Simulation(dt, max_r, friction, mock_particles, mock_interaction)
 
 
 def test_simulation_step_behavior(basic_simulation):
