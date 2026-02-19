@@ -22,7 +22,7 @@ def main():
     print("-> Initialisiere Regeln...")
     interactions = Interaction(NUMBER_OF_TYPES)
 
-    print("-> Starte Physik-Engine...")
+    print("-> Starte Physik-Engine...") 
     # Übergabe aller Parameter inkl. Noise an die Simulation
     sim = Simulation(DT, MAX_R, FRICTION, particles, interactions)
 
