@@ -28,7 +28,7 @@ def main():
     DT = 0.001       # Zeitschritt
     MAX_R = 0.15     # Radius der Wahrnehmung
     FRICTION = 0.1   # Reibung
-    NOISE = 0.0      # Stärke der stochastischen Zufallsbewegung (Bugfix ergänzt)
+    NOISE = 0.0      # Stärke der Zufallsbewegung 
 
     # 2. Initialisierung Backend
     print("-> Initialisiere Partikel...")
